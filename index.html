@@ -8,6 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.5/tesseract.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.js" defer></script>
 </head>
 <body>
   <header class="hero">
@@ -23,6 +24,15 @@
   </header>
 
   <main class="container">
+    <section class="panel">
+      <h2>Chatbot Guidance</h2>
+      <div class="chatbot">
+        <div id="chat-log" class="chatbot__log"></div>
+        <div class="chatbot__actions">
+          <button id="reset-chat" class="button button--ghost">Restart Guidance</button>
+        </div>
+      </div>
+    </section>
     <section class="panel">
       <h2>1) Document Ingestion & Parsing</h2>
       <div class="grid grid--two">
@@ -48,6 +58,10 @@
       <h2>2) Resolution Instruction Intake</h2>
       <div class="grid grid--two">
         <div>
+          <label class="field">
+            <span class="field__label">Upload Emails / Minutes (PDF, DOCX, TXT)</span>
+            <input id="instruction-upload" type="file" accept=".pdf,.docx,.txt" multiple />
+          </label>
           <label class="field">
             <span class="field__label">Meeting Minutes / Emails / Instructions</span>
             <textarea id="instruction-text" rows="8" placeholder="e.g., Approve opening a new branch in Abu Dhabi and appoint a manager..."></textarea>
@@ -99,6 +113,10 @@
           </label>
           <button id="generate-resolution" class="button button--primary">Generate Resolution</button>
           <button id="load-sample" class="button button--ghost">Load Sample Data</button>
+          <div class="download-group">
+            <button id="download-txt" class="button" disabled>Download TXT</button>
+            <button id="download-docx" class="button" disabled>Download DOCX</button>
+          </div>
         </div>
         <div class="output">
           <h3>Drafted Resolution</h3>

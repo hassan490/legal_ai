@@ -1,5 +1,7 @@
 const formatList = (items) => items.filter(Boolean).map((item) => `- ${item}`).join("\n");
 
+const displayValue = (value, fallback) => (value ? value : fallback);
+
 const formatDate = (value) => {
   if (!value) {
     return "[Date]";
@@ -22,11 +24,14 @@ export const draftResolution = ({ extraction, reasoning, meeting }) => {
     : directors;
 
   const preamble = `RESOLUTION OF THE ${reasoning.resolutionType.toUpperCase()}
-OF ${company.name}
-(incorporated in the ${company.jurisdiction})\n`;
+OF ${displayValue(company.name, "[Company name missing]")}
+(incorporated in the ${displayValue(company.jurisdiction, "[Jurisdiction missing]")})\n`;
 
   const recitals = `WHEREAS:
-- The Company is a ${company.form} holding Commercial License ${company.commercialLicense} with registered address at ${company.registeredAddress}.
+- The Company is a ${displayValue(company.form, "[Legal form missing]")} holding Commercial License ${displayValue(
+    company.commercialLicense,
+    "[License number missing]"
+  )} with registered address at ${displayValue(company.registeredAddress, "[Registered address missing]")}.
 - The governing documents authorize the following: ${formatList(
     reasoning.authorityChecks.boardPowers.slice(0, 3)
   ) || "- [Authority references to be inserted]"}.
@@ -49,7 +54,7 @@ Signed on ${formatDate(meeting.date)} at ${meeting.location || "[Location]"}.
 Chairperson: ${meeting.chairperson || "[Name]"}
 
 Attendees:
-${formatList(attendees)}\n`;
+${formatList(attendees.length ? attendees : ["[No attendees detected]"])}\n`;
 
   const signatureBlock = `SIGNATURES:
 ${formatList(attendees.map((name) => `${name} ____________________________`))}
