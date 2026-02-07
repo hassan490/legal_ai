@@ -25,36 +25,9 @@ const detectAuthorityThreshold = (instructions) => {
   return "Standard Majority";
 };
 
-const formalizeAction = (action) => {
-  const normalized = action.toLowerCase();
-  if (/open.*branch/.test(normalized)) {
-    return "Approve the establishment of the proposed branch in accordance with applicable UAE regulations.";
-  }
-  if (/appoint.*manager/.test(normalized)) {
-    return "Approve the appointment of the proposed manager and grant operational authority as described.";
-  }
-  if (/bank account/.test(normalized)) {
-    return "Authorize the opening and operation of the Company bank account(s) on the approved terms.";
-  }
-  if (/lease|rental/.test(normalized)) {
-    return "Approve the execution of the relevant lease documentation within the stated financial limits.";
-  }
-  if (/signing authority/.test(normalized)) {
-    return "Grant signing authority to the specified individual(s) within approved limits.";
-  }
-  if (/capital|share capital/.test(normalized)) {
-    return "Approve the relevant share capital action subject to shareholder consent requirements.";
-  }
-  if (!action.trim()) {
-    return "[Action details required]";
-  }
-  return `Approve the following action: ${action.replace(/^[^a-zA-Z0-9]+/, "").trim()}.`;
-};
-
 export const analyzeInstructions = ({ instructions, extraction, resolutionTypeOverride, authorityOverride }) => {
   const normalized = normalizeText(instructions || "");
   const actions = splitSentences(normalized);
-  const legalActions = actions.length ? actions.map(formalizeAction) : ["[Action details required]"];
 
   const resolutionType =
     resolutionTypeOverride !== "auto"
@@ -64,7 +37,7 @@ export const analyzeInstructions = ({ instructions, extraction, resolutionTypeOv
   const requiredAuthority =
     authorityOverride !== "auto" ? authorityOverride : detectAuthorityThreshold(normalized);
 
-  const warnings = [...(extraction.warnings || [])];
+  const warnings = [];
   if (!normalized) {
     warnings.push("No instructions provided. Please input meeting minutes or instructions.");
   }
@@ -92,7 +65,6 @@ export const analyzeInstructions = ({ instructions, extraction, resolutionTypeOv
     resolutionType,
     requiredAuthority,
     actions: actions.length ? actions : ["No actions detected"],
-    legalActions,
     warnings,
     authorityChecks,
     references: extraction.citations,

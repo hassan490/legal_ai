@@ -10,7 +10,6 @@ const elements = {
   docText: document.getElementById("doc-text"),
   parseDocs: document.getElementById("parse-docs"),
   chunksOutput: document.getElementById("chunks-output"),
-  instructionUpload: document.getElementById("instruction-upload"),
   instructionText: document.getElementById("instruction-text"),
   instructionOutput: document.getElementById("instruction-output"),
   resolutionType: document.getElementById("resolution-type"),
@@ -24,21 +23,12 @@ const elements = {
   extractionJson: document.getElementById("extraction-json"),
   reasoningJson: document.getElementById("reasoning-json"),
   loadSample: document.getElementById("load-sample"),
-  chatLog: document.getElementById("chat-log"),
 };
 
 let latestDocuments = [];
 let latestChunks = [];
 let latestExtraction = null;
 let latestReasoning = null;
-
-const appendChatMessage = (content, type = "bot") => {
-  const message = document.createElement("div");
-  message.className = `chat__message chat__message--${type}`;
-  message.innerHTML = `<p>${content}</p>`;
-  elements.chatLog.appendChild(message);
-  elements.chatLog.scrollTop = elements.chatLog.scrollHeight;
-};
 
 const renderChunks = (chunks) => {
   if (!chunks.length) {
@@ -76,8 +66,8 @@ const renderInstructionAnalysis = (analysis) => {
       <span class="status-pill status-pill--success">Authority: ${htmlEscape(analysis.requiredAuthority)}</span>
     </div>
     <div class="card">
-      <strong>Legalized Actions</strong>
-      <ul>${analysis.legalActions.map((action) => `<li>${htmlEscape(action)}</li>`).join("")}</ul>
+      <strong>Key Actions</strong>
+      <ul>${analysis.actions.map((action) => `<li>${htmlEscape(action)}</li>`).join("")}</ul>
     </div>
     ${warnings}
   `;
@@ -102,40 +92,27 @@ const handleParseDocuments = async () => {
 
   latestExtraction = extractLegalData(latestChunks);
   refreshJsonOutputs();
-
-  appendChatMessage("Documents parsed. I have extracted company details, authorities, and governance references.");
-  if (latestExtraction.warnings?.length) {
-    appendChatMessage(
-      `Important: ${latestExtraction.warnings.map((warning) => htmlEscape(warning)).join(" ")}`,
-      "bot"
-    );
-  }
 };
 
 const handleRunAnalysis = () => {
   if (!latestExtraction) {
     elements.instructionOutput.innerHTML = "<p>Please parse documents first.</p>";
-    appendChatMessage("Please parse the constitutional documents before analyzing instructions.", "bot");
     return;
   }
-
-  const instructionText = elements.instructionText.value.trim();
+  const instructions = elements.instructionText.value.trim();
   latestReasoning = analyzeInstructions({
-    instructions: instructionText,
+    instructions,
     extraction: latestExtraction,
     resolutionTypeOverride: elements.resolutionType.value,
     authorityOverride: elements.authorityThreshold.value,
   });
   renderInstructionAnalysis(latestReasoning);
   refreshJsonOutputs();
-
-  appendChatMessage("Instruction analysis completed. I identified the resolution type and required authority.");
 };
 
 const handleGenerateResolution = () => {
   if (!latestExtraction || !latestReasoning) {
     elements.resolutionOutput.innerHTML = "<p>Please parse documents and run reasoning first.</p>";
-    appendChatMessage("Please complete Steps 1 and 2 before generating the resolution.", "bot");
     return;
   }
 
@@ -150,7 +127,6 @@ const handleGenerateResolution = () => {
   });
 
   elements.resolutionOutput.innerHTML = `<div class="card"><pre>${htmlEscape(draft)}</pre></div>`;
-  appendChatMessage("Drafting complete. Review the resolution text and JSON outputs for traceability.");
 };
 
 const handleLoadSample = () => {
@@ -159,25 +135,12 @@ const handleLoadSample = () => {
   elements.meetingDate.value = new Date().toISOString().split("T")[0];
   elements.meetingLocation.value = "Dubai, United Arab Emirates";
   elements.chairperson.value = "Ms. Sara Al Mansouri";
-  appendChatMessage("Sample data loaded. You can now parse documents and run the reasoning step.");
-};
-
-const handleInstructionUpload = async () => {
-  const files = elements.instructionUpload.files;
-  if (!files.length) {
-    return;
-  }
-  const parsed = await parseDocuments(files, "");
-  const combined = parsed.map((doc) => doc.text).join("\n\n");
-  elements.instructionText.value = combined;
-  appendChatMessage("Instruction files uploaded and parsed. Please review and run legal reasoning.");
 };
 
 elements.parseDocs.addEventListener("click", handleParseDocuments);
 elements.runAnalysis.addEventListener("click", handleRunAnalysis);
 elements.generateResolution.addEventListener("click", handleGenerateResolution);
 elements.loadSample.addEventListener("click", handleLoadSample);
-elements.instructionUpload.addEventListener("change", handleInstructionUpload);
 
 renderChunks([]);
 renderInstructionAnalysis(null);

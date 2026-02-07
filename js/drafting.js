@@ -2,7 +2,7 @@ const formatList = (items) => items.filter(Boolean).map((item) => `- ${item}`).j
 
 const formatDate = (value) => {
   if (!value) {
-    return "[Date not provided]";
+    return "[Date]";
   }
   const date = new Date(value);
   return date.toLocaleDateString("en-GB", {
@@ -11,8 +11,6 @@ const formatDate = (value) => {
     year: "numeric",
   });
 };
-
-const safeValue = (value, fallback) => (value ? value : fallback);
 
 export const draftResolution = ({ extraction, reasoning, meeting }) => {
   const company = extraction.company;
@@ -24,21 +22,18 @@ export const draftResolution = ({ extraction, reasoning, meeting }) => {
     : directors;
 
   const preamble = `RESOLUTION OF THE ${reasoning.resolutionType.toUpperCase()}
-OF ${safeValue(company.name, "[Company name not provided]")}
-(incorporated in the ${safeValue(company.jurisdiction, "[Jurisdiction not provided]")})\n`;
+OF ${company.name}
+(incorporated in the ${company.jurisdiction})\n`;
 
   const recitals = `WHEREAS:
-- The Company is a ${safeValue(company.form, "[Company form not provided]")} holding Commercial License ${safeValue(
-    company.commercialLicense,
-    "[License number not provided]"
-  )} with registered address at ${safeValue(company.registeredAddress, "[Registered address not provided]")}.
+- The Company is a ${company.form} holding Commercial License ${company.commercialLicense} with registered address at ${company.registeredAddress}.
 - The governing documents authorize the following: ${formatList(
     reasoning.authorityChecks.boardPowers.slice(0, 3)
-  ) || "- [Authority references not located]"}.
+  ) || "- [Authority references to be inserted]"}.
 - The meeting has been duly convened in accordance with the notice requirements and quorum rules outlined in the Articles of Association.`;
 
   const resolutionBody = `IT IS RESOLVED THAT:
-${formatList(reasoning.legalActions)}
+${formatList(reasoning.actions)}
 
 AUTHORITY & COMPLIANCE:
 - Required authority: ${reasoning.requiredAuthority}.
@@ -50,16 +45,16 @@ AUTHORITY & COMPLIANCE:
 `;
 
   const execution = `EXECUTION:
-Signed on ${formatDate(meeting.date)} at ${safeValue(meeting.location, "[Location not provided]")}.
-Chairperson: ${safeValue(meeting.chairperson, "[Chairperson not provided]")}
+Signed on ${formatDate(meeting.date)} at ${meeting.location || "[Location]"}.
+Chairperson: ${meeting.chairperson || "[Name]"}
 
 Attendees:
-${attendees.length ? formatList(attendees) : "- [Attendees not identified]"}\n`;
+${formatList(attendees)}\n`;
 
   const signatureBlock = `SIGNATURES:
-${attendees.length ? formatList(attendees.map((name) => `${name} ____________________________`)) : "- [Signatories not identified]"}
+${formatList(attendees.map((name) => `${name} ____________________________`))}
 
-Note: Any ambiguity must be escalated for shareholder approval or external legal confirmation.`;
+Note: If any ambiguity remains, escalate for shareholder approval or seek external legal confirmation.`;
 
   return [preamble, recitals, resolutionBody, execution, signatureBlock].join("\n\n");
 };
