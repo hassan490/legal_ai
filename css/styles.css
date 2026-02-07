@@ -1,0 +1,233 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b0d12;
+  --panel: #131721;
+  --panel-2: #1a2030;
+  --accent: #4cc9f0;
+  --accent-2: #7209b7;
+  --text: #f1f5ff;
+  --muted: #9aa6c0;
+  --border: #243049;
+  --success: #2ec4b6;
+  --warning: #fca311;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.hero {
+  padding: 3.5rem 1.5rem 2.5rem;
+  background: radial-gradient(circle at top, rgba(76, 201, 240, 0.2), transparent 60%),
+    radial-gradient(circle at right, rgba(114, 9, 183, 0.25), transparent 50%),
+    var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.hero__content {
+  max-width: 980px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 3vw, 3rem);
+  margin-bottom: 0.75rem;
+}
+
+.hero p {
+  color: var(--muted);
+  max-width: 720px;
+  margin-bottom: 1.5rem;
+}
+
+.hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.hero__badges span {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+}
+
+.panel h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.grid--two {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.field__label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+input,
+select,
+textarea {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.button {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 0.5rem;
+}
+
+.button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.button--primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border: none;
+  color: #0b0d12;
+}
+
+.button--primary:hover {
+  filter: brightness(1.1);
+  color: #0b0d12;
+}
+
+.button--ghost {
+  background: transparent;
+}
+
+.output {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  min-height: 260px;
+}
+
+.output h3 {
+  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
+}
+
+.output__body {
+  color: var(--muted);
+  font-size: 0.95rem;
+  max-height: 360px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.output__body .card {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.json-output {
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  max-height: 360px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+}
+
+.status-pill--success {
+  color: var(--success);
+  border-color: rgba(46, 196, 182, 0.4);
+}
+
+.status-pill--warning {
+  color: var(--warning);
+  border-color: rgba(252, 163, 17, 0.4);
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 2.5rem 1.2rem;
+  }
+
+  .panel {
+    padding: 1.25rem;
+  }
+}
