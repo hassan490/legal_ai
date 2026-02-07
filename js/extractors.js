@@ -17,61 +17,87 @@ export const extractLegalData = (chunks) => {
   const sentences = splitSentences(combined);
   const missingFields = [];
 
-  const company = {
-    name: pickFirst([
-      findMatch(combined, [/Company Name[:\-\s]+([^\n.]+)/i, /name of the company[:\-\s]+([^\n.]+)/i]),
-    ]),
-    form: pickFirst([findMatch(combined, [/limited liability company|llc|private joint stock|pjsc/i])]),
-    jurisdiction: pickFirst([
-      findMatch(combined, [/United Arab Emirates|UAE|Dubai|Abu Dhabi|Sharjah|Ajman|RAK/i]),
-    ]),
-    registeredAddress: pickFirst([
-      findMatch(combined, [/registered address[:\-\s]+([^\n.]+)/i, /address[:\-\s]+([^\n.]+)/i]),
-    ]),
-    commercialLicense: pickFirst([
-      findMatch(combined, [/commercial license(?: no\.?| number)?[:\-\s]+([^\n.]+)/i]),
-    ]),
+  const capture = (label, value) => {
+    if (!value) {
+      missingFields.push(label);
+      return null;
+    }
+    return value;
   };
 
-  const directors = sentences
-    .filter((sentence) => /director|manager|authorized signatory/i.test(sentence))
-    .slice(0, 6)
-    .map((sentence) => {
-      const name = findMatch(sentence, [/Mr\.?\s+[A-Za-z\s]+/, /Ms\.?\s+[A-Za-z\s]+/, /Mrs\.?\s+[A-Za-z\s]+/]);
-      if (!name) {
-        return null;
-      }
-      return {
-        name: name.trim(),
-        appointmentMethod: findMatch(sentence, [/appointed by shareholders|appointed by the shareholders/i]),
-        signingAuthority: findMatch(sentence, [/sole signatory|joint signatory|authorized signatory/i]),
-        idNumber: findMatch(sentence, [/passport\s*([A-Z0-9-]+)/i, /emirates id\s*([0-9-]+)/i]),
-      };
-    })
-    .filter(Boolean);
+  const company = {
+    name: capture(
+      "Company name",
+      findMatches(combined, [/Company Name[:\-\s]+([^\n.]+)/i, /name of the company[:\-\s]+([^\n.]+)/i])
+    ),
+    form: capture(
+      "Legal form",
+      findMatches(combined, [/limited liability company|llc|private joint stock/i])
+    ),
+    jurisdiction: capture(
+      "Jurisdiction",
+      findMatches(combined, [/United Arab Emirates|UAE|Dubai|Abu Dhabi/i])
+    ),
+    registeredAddress: capture(
+      "Registered address",
+      findMatches(combined, [/registered address[:\-\s]+([^\n.]+)/i])
+    ),
+    commercialLicense: capture(
+      "Commercial license number",
+      findMatches(combined, [/commercial license(?: no\.?| number)?[:\-\s]+([^\n.]+)/i])
+    ),
+  };
 
   const shareholders = sentences
     .filter((sentence) => /shareholder|member/i.test(sentence))
-    .slice(0, 6)
+    .slice(0, 5)
     .map((sentence) => {
-      const name = findMatch(sentence, [/Mr\.?\s+[A-Za-z\s]+/, /Ms\.?\s+[A-Za-z\s]+/, /Mrs\.?\s+[A-Za-z\s]+/]);
+      const name = findMatches(sentence, [/Mr\.?|Ms\.?|Mrs\.?|Dr\.?\s+[A-Za-z\s]+/]);
       if (!name) {
         return null;
       }
       return {
-        name: name.trim(),
-        nationality: findMatch(sentence, [/nationality[:\-\s]+([^,]+)/i]),
-        ownership: findMatch(sentence, [/([0-9]{1,3}%)/]),
-        idNumber: findMatch(sentence, [/passport\s*([A-Z0-9-]+)/i, /emirates id\s*([0-9-]+)/i]),
+        name,
+        nationality: findMatches(sentence, [/nationality[:\-\s]+([^,]+)/i]) || null,
+        idNumber: findMatches(sentence, [/passport|emirates id[:\-\s]+([^,]+)/i]) || null,
+        ownership: findMatches(sentence, [/([0-9]{1,3}%)/]) || null,
         powerOfAttorney: /power of attorney|poa/i.test(sentence) ? "On file" : null,
       };
     })
     .filter(Boolean);
 
+  if (!shareholders.length) {
+    missingFields.push("Shareholder names and ownership");
+  }
+
+  const directors = sentences
+    .filter((sentence) => /director|manager|authorized signatory/i.test(sentence))
+    .slice(0, 5)
+    .map((sentence) => {
+      const name = findMatches(sentence, [/Mr\.?|Ms\.?|Mrs\.?|Dr\.?\s+[A-Za-z\s]+/]);
+      if (!name) {
+        return null;
+      }
+      return {
+        name,
+        idNumber: findMatches(sentence, [/passport|emirates id[:\-\s]+([^,]+)/i]) || null,
+        appointmentMethod: /appointed by shareholders/i.test(sentence)
+          ? "Appointed by shareholders"
+          : null,
+        signingAuthority: /sole signatory|joint signatory/i.test(sentence) ? "As specified" : null,
+      };
+    })
+    .filter(Boolean);
+
+  if (!directors.length) {
+    missingFields.push("Director/manager names");
+  }
+
   const quorum = {
-    board: findMatch(combined, [/board quorum[:\-\s]+([^\n.]+)/i]),
-    shareholder: findMatch(combined, [/shareholder quorum[:\-\s]+([^\n.]+)/i]),
-    majority: findMatch(combined, [/majority threshold[:\-\s]+([^\n.]+)/i]),
+    board: findMatches(combined, [/board quorum[:\-\s]+([^\n.]+)/i]) || null,
+    shareholder: findMatches(combined, [/shareholder quorum[:\-\s]+([^\n.]+)/i]) || null,
+    majority: findMatches(combined, [/majority threshold[:\-\s]+([^\n.]+)/i]) || null,
+    castingVote: /casting vote/i.test(combined) ? "Chairperson has casting vote" : null,
   };
 
   const authority = {
@@ -81,14 +107,15 @@ export const extractLegalData = (chunks) => {
     shareholderMatters: sentences
       .filter((sentence) => /shareholder.*(reserved|approval|authority)/i.test(sentence))
       .slice(0, 6),
-    financialThresholds: findMatch(combined, [/threshold[:\-\s]+([^\n.]+)/i, /up to\s+AED\s+([0-9,]+)/i]),
+    financialThresholds: findMatches(combined, [/threshold[:\-\s]+([^\n.]+)/i]),
     prohibitedActions: sentences.filter((sentence) => /prohibited|shall not/i.test(sentence)).slice(0, 4),
   };
 
   const formalities = {
-    noticePeriod: findMatch(combined, [/notice period[:\-\s]+([^\n.]+)/i]),
-    meetingLocation: findMatch(combined, [/meeting location[:\-\s]+([^\n.]+)/i]),
-    language: findMatch(combined, [/language[:\-\s]+([^\n.]+)/i]),
+    noticePeriod: findMatches(combined, [/notice period[:\-\s]+([^\n.]+)/i]) || null,
+    meetingLocation: findMatches(combined, [/meeting location[:\-\s]+([^\n.]+)/i]) || null,
+    chairperson: findMatches(combined, [/chairperson[:\-\s]+([^\n.]+)/i]) || null,
+    language: findMatches(combined, [/language[:\-\s]+([^\n.]+)/i]) || null,
   };
 
   if (!company.name) missingFields.push("Company name");

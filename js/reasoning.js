@@ -58,18 +58,20 @@ export const analyzeInstructions = ({ instructions, extraction, resolutionTypeOv
     warnings.push("Check prohibited actions clauses for potential conflict.");
   }
 
+  const authorityChecks = {
+    boardPowers: extraction.authority.boardPowers,
+    shareholderMatters: extraction.authority.shareholderMatters,
+    financialThresholds: extraction.authority.financialThresholds || "Not located in source documents",
+    requiredAuthority,
+  };
+
   return {
     resolutionType,
     requiredAuthority,
     actions: actions.length ? actions : ["No actions detected"],
     warnings,
     missingFields: extraction.missingFields || [],
-    authorityChecks: {
-      boardPowers: extraction.authority.boardPowers,
-      shareholderMatters: extraction.authority.shareholderMatters,
-      financialThresholds: extraction.authority.financialThresholds || "Not located in source documents",
-      requiredAuthority,
-    },
+    authorityChecks,
     references: extraction.citations,
     legalFramework: "UAE Federal Decree-Law No. 32 of 2021",
   };

@@ -31,7 +31,7 @@ OF ${displayValue(company.name, "[Company name missing]")}
     company.commercialLicense,
     "[License number missing]"
   )} with registered address at ${displayValue(company.registeredAddress, "[Registered address missing]")}.
-- The governing documents provide authority for board/shareholder actions including: ${formatList(
+- The governing documents authorize the following: ${formatList(
     reasoning.authorityChecks.boardPowers.slice(0, 3)
   ) || "- [Authority references to be inserted]"}.
 - The meeting has been duly convened in accordance with notice and quorum requirements set out in the Articles of Association.`;
