@@ -5,7 +5,7 @@ const detectResolutionType = (instructions, authority) => {
   if (/amend|capital increase|merger|dissolution/.test(text)) {
     return "Special Shareholder Resolution";
   }
-  if (/appoint director|open branch|bank account|signing authority/.test(text)) {
+  if (/appoint director|open branch|bank account|signing authority|lease/i.test(text)) {
     return "Board Resolution";
   }
   if (authority.shareholderMatters.length) {
@@ -19,7 +19,7 @@ const detectAuthorityThreshold = (instructions) => {
   if (/unanimous|all shareholders/.test(text)) {
     return "Unanimous";
   }
-  if (/special resolution|supermajority/.test(text)) {
+  if (/special resolution|supermajority|75%/.test(text)) {
     return "Supermajority";
   }
   return "Standard Majority";
@@ -50,23 +50,26 @@ export const analyzeInstructions = ({ instructions, extraction, resolutionTypeOv
     warnings.push("Board resolution requested but no directors/managers detected in documents.");
   }
 
+  if (extraction.missingFields?.length) {
+    warnings.push(`Missing data: ${extraction.missingFields.join(", ")}.`);
+  }
+
   if (normalized && extraction.authority.prohibitedActions.length) {
     warnings.push("Check prohibited actions clauses for potential conflict.");
   }
-
-  const authorityChecks = {
-    boardPowers: extraction.authority.boardPowers,
-    shareholderMatters: extraction.authority.shareholderMatters,
-    financialThresholds: extraction.authority.financialThresholds,
-    requiredAuthority,
-  };
 
   return {
     resolutionType,
     requiredAuthority,
     actions: actions.length ? actions : ["No actions detected"],
     warnings,
-    authorityChecks,
+    missingFields: extraction.missingFields || [],
+    authorityChecks: {
+      boardPowers: extraction.authority.boardPowers,
+      shareholderMatters: extraction.authority.shareholderMatters,
+      financialThresholds: extraction.authority.financialThresholds || "Not located in source documents",
+      requiredAuthority,
+    },
     references: extraction.citations,
     legalFramework: "UAE Federal Decree-Law No. 32 of 2021",
   };

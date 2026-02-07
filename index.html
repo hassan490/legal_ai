@@ -3,58 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Legal AI Workflow Automation - UAE Resolutions</title>
+  <title>Legal AI Resolution Assistant</title>
   <link rel="stylesheet" href="css/styles.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.5/tesseract.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.js" defer></script>
 </head>
 <body>
   <header class="hero">
     <div class="hero__content">
-      <h1>Legal AI Workflow Automation</h1>
-      <p>Draft UAE Board & Shareholder Resolutions with traceable authority checks and defensible outputs.</p>
+      <div>
+        <p class="eyebrow">UAE Corporate Resolutions</p>
+        <h1>Legal AI Resolution Assistant</h1>
+        <p>
+          Draft compliant Board and Shareholder resolutions for UAE companies. Upload MoA/AoA, emails,
+          and meeting minutes, confirm extracted data, and generate enforceable resolutions.
+        </p>
+      </div>
       <div class="hero__badges">
+        <span>Client-side only</span>
         <span>UAE Federal Decree-Law No. 32 of 2021</span>
-        <span>Board & Shareholder Compliance</span>
-        <span>Client-Side JS Only</span>
+        <span>No hallucinated data</span>
       </div>
     </div>
   </header>
 
   <main class="container">
+    <section class="panel panel--chat">
+      <div>
+        <h2>Guided Chatbot Workflow</h2>
+        <p class="muted">
+          Follow the steps below. The assistant will highlight missing data and ask for clarifications.
+        </p>
+      </div>
+      <div class="chatbot">
+        <div id="chat-log" class="chatbot__log"></div>
+        <div class="chatbot__actions">
+          <button id="reset-chat" class="button button--ghost">Restart guidance</button>
+          <button id="load-sample" class="button">Load sample data</button>
+        </div>
+      </div>
+    </section>
+
     <section class="panel">
-      <h2>1) Document Ingestion & Parsing</h2>
+      <h2>Step 1 · Document Upload & Parsing</h2>
       <div class="grid grid--two">
         <div>
           <label class="field">
-            <span class="field__label">Upload AoA / MoA / Constitutional Documents (PDF, DOCX, TXT)</span>
+            <span class="field__label">Upload MoA/AoA and corporate documents (PDF, DOCX, TXT)</span>
             <input id="doc-upload" type="file" accept=".pdf,.docx,.txt" multiple />
           </label>
-          <div class="field">
-            <span class="field__label">Or paste document text</span>
-            <textarea id="doc-text" rows="8" placeholder="Paste document excerpts here..."></textarea>
-          </div>
-          <button id="parse-docs" class="button">Parse Documents</button>
+          <label class="field">
+            <span class="field__label">Paste document text (optional)</span>
+            <textarea id="doc-text" rows="7" placeholder="Paste MoA/AoA excerpts here..."></textarea>
+          </label>
+          <button id="parse-docs" class="button button--primary">Parse constitutional documents</button>
         </div>
         <div class="output">
-          <h3>Parsed & Chunked Articles</h3>
+          <h3>Parsed Articles & Sections</h3>
           <div id="chunks-output" class="output__body"></div>
         </div>
       </div>
     </section>
 
     <section class="panel">
-      <h2>2) Resolution Instruction Intake</h2>
+      <h2>Step 2 · Upload Minutes / Emails</h2>
       <div class="grid grid--two">
         <div>
           <label class="field">
-            <span class="field__label">Meeting Minutes / Emails / Instructions</span>
-            <textarea id="instruction-text" rows="8" placeholder="e.g., Approve opening a new branch in Abu Dhabi and appoint a manager..."></textarea>
+            <span class="field__label">Upload meeting minutes or emails (PDF, DOCX, TXT)</span>
+            <input id="instruction-upload" type="file" accept=".pdf,.docx,.txt" multiple />
+          </label>
+          <label class="field">
+            <span class="field__label">Instructions / minutes text</span>
+            <textarea id="instruction-text" rows="7" placeholder="Describe the resolution request or paste the minutes."></textarea>
           </label>
           <div class="grid grid--two">
             <label class="field">
-              <span class="field__label">Resolution Type</span>
+              <span class="field__label">Resolution type</span>
               <select id="resolution-type">
                 <option value="auto">Auto-detect</option>
                 <option value="board">Board Resolution</option>
@@ -63,7 +90,7 @@
               </select>
             </label>
             <label class="field">
-              <span class="field__label">Authority Threshold</span>
+              <span class="field__label">Authority threshold</span>
               <select id="authority-threshold">
                 <option value="auto">Auto-detect</option>
                 <option value="standard">Standard Majority</option>
@@ -72,7 +99,7 @@
               </select>
             </label>
           </div>
-          <button id="run-analysis" class="button">Run Legal Reasoning</button>
+          <button id="run-analysis" class="button">Analyze instructions</button>
         </div>
         <div class="output">
           <h3>Instruction Analysis</h3>
@@ -82,23 +109,72 @@
     </section>
 
     <section class="panel">
-      <h2>3) Resolution Drafting Engine</h2>
+      <h2>Step 3 · Confirm Extracted Data</h2>
+      <div class="grid grid--two">
+        <div>
+          <div class="form-section">
+            <h3>Company Details</h3>
+            <label class="field">
+              <span class="field__label">Company name</span>
+              <input id="company-name" type="text" placeholder="Company name" />
+            </label>
+            <label class="field">
+              <span class="field__label">Legal form</span>
+              <input id="company-form" type="text" placeholder="LLC, PJSC, etc." />
+            </label>
+            <label class="field">
+              <span class="field__label">Commercial license number</span>
+              <input id="company-license" type="text" placeholder="License number" />
+            </label>
+            <label class="field">
+              <span class="field__label">Registered address</span>
+              <input id="company-address" type="text" placeholder="Registered address" />
+            </label>
+            <label class="field">
+              <span class="field__label">Jurisdiction</span>
+              <input id="company-jurisdiction" type="text" placeholder="Emirate / UAE" />
+            </label>
+          </div>
+          <div class="form-section">
+            <h3>Directors / Managers</h3>
+            <div id="directors-list" class="list"></div>
+            <button id="add-director" class="button button--ghost">Add director</button>
+          </div>
+          <div class="form-section">
+            <h3>Shareholders</h3>
+            <div id="shareholders-list" class="list"></div>
+            <button id="add-shareholder" class="button button--ghost">Add shareholder</button>
+          </div>
+          <button id="confirm-data" class="button button--primary">Confirm extracted data</button>
+        </div>
+        <div class="output">
+          <h3>Missing Data Checklist</h3>
+          <div id="missing-output" class="output__body"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Step 4 · Draft the Resolution</h2>
       <div class="grid grid--two">
         <div>
           <label class="field">
-            <span class="field__label">Meeting Date</span>
+            <span class="field__label">Meeting date</span>
             <input id="meeting-date" type="date" />
           </label>
           <label class="field">
-            <span class="field__label">Meeting Location</span>
+            <span class="field__label">Meeting location</span>
             <input id="meeting-location" type="text" placeholder="Dubai, United Arab Emirates" />
           </label>
           <label class="field">
             <span class="field__label">Chairperson</span>
             <input id="chairperson" type="text" placeholder="Name of chairperson" />
           </label>
-          <button id="generate-resolution" class="button button--primary">Generate Resolution</button>
-          <button id="load-sample" class="button button--ghost">Load Sample Data</button>
+          <button id="generate-resolution" class="button button--primary">Generate resolution</button>
+          <div class="download-group">
+            <button id="download-txt" class="button" disabled>Download TXT</button>
+            <button id="download-docx" class="button" disabled>Download DOCX</button>
+          </div>
         </div>
         <div class="output">
           <h3>Drafted Resolution</h3>
@@ -108,14 +184,14 @@
     </section>
 
     <section class="panel">
-      <h2>4) Structured JSON Output</h2>
+      <h2>Structured Outputs</h2>
       <div class="grid grid--two">
         <div class="output">
-          <h3>Extracted Legal Data</h3>
+          <h3>Extracted Data (JSON)</h3>
           <pre id="extraction-json" class="json-output"></pre>
         </div>
         <div class="output">
-          <h3>Reasoning & Compliance</h3>
+          <h3>Reasoning & Compliance (JSON)</h3>
           <pre id="reasoning-json" class="json-output"></pre>
         </div>
       </div>
@@ -123,7 +199,7 @@
   </main>
 
   <footer class="footer">
-    <p>Built for UAE corporate law workflows. Client-side only. No data leaves your browser.</p>
+    <p>All processing stays in your browser. Always review and confirm missing data before signing.</p>
   </footer>
 
   <script type="module" src="js/app.js"></script>
