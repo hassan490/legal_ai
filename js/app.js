@@ -247,7 +247,7 @@ const handleLoadSample = () => {
   elements.instructionText.value = `${sampleMinutes}\n\n${sampleEmail}`;
   elements.meetingDate.value = new Date().toISOString().split("T")[0];
   elements.meetingLocation.value = "Dubai, United Arab Emirates";
-  elements.chairperson.value = "Ms. Sara Al Mansouri";
+  elements.chairperson.value = "XXX";
   addChatMessage("Legal AI", "Sample data loaded. Parse documents to begin the workflow.");
 };
 
