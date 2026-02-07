@@ -50,6 +50,10 @@ export const analyzeInstructions = ({ instructions, extraction, resolutionTypeOv
     warnings.push("Board resolution requested but no directors/managers detected in documents.");
   }
 
+  if (extraction.missingFields?.length) {
+    warnings.push(`Missing data: ${extraction.missingFields.join(", ")}.`);
+  }
+
   if (normalized && extraction.authority.prohibitedActions.length) {
     warnings.push("Check prohibited actions clauses for potential conflict.");
   }
@@ -57,7 +61,7 @@ export const analyzeInstructions = ({ instructions, extraction, resolutionTypeOv
   const authorityChecks = {
     boardPowers: extraction.authority.boardPowers,
     shareholderMatters: extraction.authority.shareholderMatters,
-    financialThresholds: extraction.authority.financialThresholds,
+    financialThresholds: extraction.authority.financialThresholds || "Not located in source documents",
     requiredAuthority,
   };
 
@@ -66,6 +70,7 @@ export const analyzeInstructions = ({ instructions, extraction, resolutionTypeOv
     requiredAuthority,
     actions: actions.length ? actions : ["No actions detected"],
     warnings,
+    missingFields: extraction.missingFields || [],
     authorityChecks,
     references: extraction.citations,
     legalFramework: "UAE Federal Decree-Law No. 32 of 2021",
