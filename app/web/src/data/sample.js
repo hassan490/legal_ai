@@ -10,4 +10,8 @@ Unit 903, Aurora Business Centre,
 Al Quoz 3, Dubai, UAE.
 Please confirm if you agree so we can formalize this by board approval and proceed with DET filings.
 Best regards,
-Laura`;
+Laura
+
+Section 4 Directors: Ahmed Al Mansoori, Laura Whitfield
+Authorized capital: AED 1,000,000 divided into 1,000,000 shares.
+Objects: Provide technology consulting services in the UAE.`;

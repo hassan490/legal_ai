@@ -42,10 +42,14 @@ export const buildDraft = ({
   includeRisk,
   includeChecklist,
   includeTimeline,
+  includeClauseMap,
 }) => {
   const sections = [
     renderSection("Registered Office", result.registeredOffice || ""),
     renderSection("Key Dates", result.keyDates),
+    renderSection("Directors", result.directors),
+    renderSection("Share Capital", result.shareCapital || ""),
+    renderSection("Objectives", result.objectives),
     renderSection("Key Clauses", result.keyClauses),
     renderSection("Governance Notes", result.governanceNotes),
     renderSection(
@@ -61,6 +65,15 @@ export const buildDraft = ({
       renderSection(
         "Timeline",
         result.timeline.map((item) => `${item.date} — ${item.summary}`)
+      )
+    );
+  }
+
+  if (includeClauseMap) {
+    sections.push(
+      renderSection(
+        "Clause Map",
+        result.clauseMap.map((item) => `${item.label} — ${item.summary}`)
       )
     );
   }

@@ -5,6 +5,9 @@ import {
   REGISTERED_OFFICE_PATTERN,
   EMAIL_HEADER_PATTERN,
   ADDRESS_BREAK_PATTERN,
+  DIRECTOR_PATTERN,
+  CAPITAL_PATTERN,
+  OBJECTIVE_PATTERN,
 } from "./patterns.js";
 
 const chunkByArticles = (text) => {
@@ -95,6 +98,43 @@ const extractActionItems = (text) => {
   return actions.slice(0, 6);
 };
 
+const extractObjectives = (text) => {
+  const objectives = [];
+  text.split("\n").forEach((line) => {
+    const match = line.trim().match(OBJECTIVE_PATTERN);
+    if (match) {
+      objectives.push(match[2].trim());
+    }
+  });
+  return objectives;
+};
+
+const extractDirectors = (text) => {
+  const directors = [];
+  text.split("\n").forEach((line) => {
+    const match = line.trim().match(DIRECTOR_PATTERN);
+    if (match && match[2]) {
+      directors.push(match[2].trim());
+    }
+  });
+  return directors;
+};
+
+const extractShareCapital = (text) => {
+  const match = text.match(CAPITAL_PATTERN);
+  return match ? match[2].trim() : "";
+};
+
+const buildClauseMap = (text) =>
+  text
+    .split("\n")
+    .filter((line) => ARTICLE_PATTERN.test(line.trim()))
+    .map((line, index) => ({
+      id: `clause-${index + 1}`,
+      label: line.trim(),
+      summary: "Clause reference detected for review.",
+    }));
+
 const buildTimeline = (text) => {
   const dates = [...new Set(text.match(DATE_PATTERN) || [])].sort();
   return dates.map((date, index) => ({
@@ -159,21 +199,23 @@ export const parseDocument = (text) => {
     warnings.push("Registered office not detected; confirm address manually.");
 
   const timeline = buildTimeline(fullText);
+  const clauseMap = buildClauseMap(fullText);
 
   return {
     documentType,
     companyName,
     registeredOffice,
     keyDates,
-    directors: [],
+    directors: extractDirectors(fullText),
     shareholders: [],
-    shareCapital: "",
-    objectives: [],
+    shareCapital: extractShareCapital(fullText),
+    objectives: extractObjectives(fullText),
     keyClauses,
     governanceNotes,
     parties: extractParties(fullText),
     actionItems: extractActionItems(fullText),
     timeline,
+    clauseMap,
     authorities: suggestAuthorities(documentType),
     warnings,
   };

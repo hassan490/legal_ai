@@ -4,6 +4,8 @@ export const renderSummary = (elements, result) => {
     ["Company", result.companyName || "TBD"],
     ["Registered Office", result.registeredOffice || "Not detected"],
     ["Key Dates", result.keyDates.join(", ") || "Not detected"],
+    ["Directors", result.directors?.join(", ") || "Not detected"],
+    ["Share Capital", result.shareCapital || "Not detected"],
   ];
 
   elements.summaryGrid.innerHTML = summaryItems
@@ -43,4 +45,22 @@ export const renderTimeline = (elements, result) => {
 export const renderOutputs = (elements, result, draft) => {
   elements.draftOutput.textContent = draft;
   elements.jsonOutput.textContent = JSON.stringify(result, null, 2);
+};
+
+export const renderClauseMap = (elements, result) => {
+  if (!elements.clauseMap) return;
+  if (!result.clauseMap || result.clauseMap.length === 0) {
+    elements.clauseMap.innerHTML = "<p class=\"subtitle\">No clauses detected.</p>";
+    return;
+  }
+  elements.clauseMap.innerHTML = result.clauseMap
+    .map(
+      (item) => `
+        <div class="clause-item">
+          <strong>${item.label}</strong>
+          <span>${item.summary}</span>
+        </div>
+      `
+    )
+    .join("");
 };

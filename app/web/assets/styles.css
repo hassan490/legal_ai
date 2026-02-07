@@ -53,6 +53,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .primary,
@@ -179,7 +180,7 @@ textarea {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -239,6 +240,27 @@ textarea {
   font-size: 12px;
 }
 
+.clause-map {
+  display: grid;
+  gap: 10px;
+}
+
+.clause-item {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #101624;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.clause-item span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 pre {
   background: #0b0f18;
   border-radius: 12px;
@@ -267,5 +289,11 @@ footer {
 
   .split {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

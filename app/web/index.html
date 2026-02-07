@@ -18,6 +18,8 @@
       </div>
       <div class="hero-actions">
         <button class="ghost" id="loadSample">Load sample</button>
+        <button class="ghost" id="downloadDraft">Download draft</button>
+        <button class="ghost" id="downloadJson">Download JSON</button>
         <button class="primary" id="generateDraft">Generate draft</button>
       </div>
     </header>
@@ -71,6 +73,10 @@
               <input type="checkbox" id="includeTimeline" checked />
               Include timeline
             </label>
+            <label class="option">
+              <input type="checkbox" id="includeClauseMap" checked />
+              Include clause map
+            </label>
           </div>
         </div>
       </section>
@@ -85,6 +91,11 @@
         <div class="summary">
           <h2>Document timeline</h2>
           <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div class="summary">
+          <h2>Clause map</h2>
+          <div class="clause-map" id="clauseMap"></div>
         </div>
 
         <div class="output">

@@ -32,4 +32,31 @@ export const setupInteractions = ({ elements, state, sampleText, onGenerate }) =
   elements.includeTimeline.addEventListener("change", () => {
     state.includeTimeline = elements.includeTimeline.checked;
   });
+  elements.includeClauseMap.addEventListener("change", () => {
+    state.includeClauseMap = elements.includeClauseMap.checked;
+  });
+
+  elements.downloadDraft.addEventListener("click", () => {
+    const blob = new Blob([elements.draftOutput.textContent], {
+      type: "text/plain;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "draft_output.txt";
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+
+  elements.downloadJson.addEventListener("click", () => {
+    const blob = new Blob([elements.jsonOutput.textContent], {
+      type: "application/json;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "extracted_data.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  });
 };

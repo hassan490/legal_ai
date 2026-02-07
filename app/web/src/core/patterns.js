@@ -13,3 +13,8 @@ export const EMAIL_HEADER_PATTERN = /^(email|from|to|subject|date)\b/i;
 
 export const ADDRESS_BREAK_PATTERN =
   /^(please|authorize|best|regards|noted|for the record)\b/i;
+
+export const DIRECTOR_PATTERN = /(director|board of directors)[:\-]?\s*(.+)/i;
+export const CAPITAL_PATTERN =
+  /(share capital|authorized capital|authorised capital)[:\-]?\s*(.+)/i;
+export const OBJECTIVE_PATTERN = /^(objects|objectives|main objects)[:\-]?\s*(.+)$/i;
