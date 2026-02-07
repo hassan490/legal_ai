@@ -18,7 +18,6 @@ export const draftResolution = ({ extraction, reasoning, meeting }) => {
   const company = extraction.company;
   const directors = extraction.directors.map((director) => director.name).filter(Boolean);
   const shareholders = extraction.shareholders.map((shareholder) => shareholder.name).filter(Boolean);
-
   const attendees = reasoning.resolutionType.toLowerCase().includes("shareholder")
     ? shareholders
     : directors;
@@ -35,7 +34,7 @@ OF ${displayValue(company.name, "[Company name missing]")}
 - The governing documents authorize the following: ${formatList(
     reasoning.authorityChecks.boardPowers.slice(0, 3)
   ) || "- [Authority references to be inserted]"}.
-- The meeting has been duly convened in accordance with the notice requirements and quorum rules outlined in the Articles of Association.`;
+- The meeting has been duly convened in accordance with notice and quorum requirements set out in the Articles of Association.`;
 
   const resolutionBody = `IT IS RESOLVED THAT:
 ${formatList(reasoning.actions)}

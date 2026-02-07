@@ -5,7 +5,7 @@ const detectResolutionType = (instructions, authority) => {
   if (/amend|capital increase|merger|dissolution/.test(text)) {
     return "Special Shareholder Resolution";
   }
-  if (/appoint director|open branch|bank account|signing authority/.test(text)) {
+  if (/appoint director|open branch|bank account|signing authority|lease/i.test(text)) {
     return "Board Resolution";
   }
   if (authority.shareholderMatters.length) {
@@ -19,7 +19,7 @@ const detectAuthorityThreshold = (instructions) => {
   if (/unanimous|all shareholders/.test(text)) {
     return "Unanimous";
   }
-  if (/special resolution|supermajority/.test(text)) {
+  if (/special resolution|supermajority|75%/.test(text)) {
     return "Supermajority";
   }
   return "Standard Majority";

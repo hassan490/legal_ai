@@ -4,26 +4,43 @@ import { analyzeInstructions } from "./reasoning.js";
 import { draftResolution } from "./drafting.js";
 import { downloadTxt, downloadDocx } from "./exporter.js";
 import { formatJson, htmlEscape } from "./utils.js";
-import { sampleAoA, sampleInstructions } from "./sampleData.js";
+import { sampleAoA, sampleMinutes, sampleEmail } from "./sampleData.js";
 
 const elements = {
   docUpload: document.getElementById("doc-upload"),
   docText: document.getElementById("doc-text"),
   parseDocs: document.getElementById("parse-docs"),
   chunksOutput: document.getElementById("chunks-output"),
+  instructionUpload: document.getElementById("instruction-upload"),
   instructionText: document.getElementById("instruction-text"),
   instructionUpload: document.getElementById("instruction-upload"),
   instructionOutput: document.getElementById("instruction-output"),
   resolutionType: document.getElementById("resolution-type"),
   authorityThreshold: document.getElementById("authority-threshold"),
   runAnalysis: document.getElementById("run-analysis"),
+  instructionOutput: document.getElementById("instruction-output"),
+  missingOutput: document.getElementById("missing-output"),
+  companyName: document.getElementById("company-name"),
+  companyForm: document.getElementById("company-form"),
+  companyLicense: document.getElementById("company-license"),
+  companyAddress: document.getElementById("company-address"),
+  companyJurisdiction: document.getElementById("company-jurisdiction"),
+  directorsList: document.getElementById("directors-list"),
+  shareholdersList: document.getElementById("shareholders-list"),
+  addDirector: document.getElementById("add-director"),
+  addShareholder: document.getElementById("add-shareholder"),
+  confirmData: document.getElementById("confirm-data"),
   meetingDate: document.getElementById("meeting-date"),
   meetingLocation: document.getElementById("meeting-location"),
   chairperson: document.getElementById("chairperson"),
   generateResolution: document.getElementById("generate-resolution"),
   resolutionOutput: document.getElementById("resolution-output"),
+  downloadTxt: document.getElementById("download-txt"),
+  downloadDocx: document.getElementById("download-docx"),
   extractionJson: document.getElementById("extraction-json"),
   reasoningJson: document.getElementById("reasoning-json"),
+  chatLog: document.getElementById("chat-log"),
+  resetChat: document.getElementById("reset-chat"),
   loadSample: document.getElementById("load-sample"),
   downloadTxt: document.getElementById("download-txt"),
   downloadDocx: document.getElementById("download-docx"),
@@ -77,7 +94,7 @@ const renderChunks = (chunks) => {
       <div class="card">
         <strong>${htmlEscape(chunk.heading || "Untitled Section")}</strong>
         <p>${htmlEscape(chunk.body.slice(0, 240))}${chunk.body.length > 240 ? "…" : ""}</p>
-        <span class="status-pill">Source: ${htmlEscape(chunk.source)}</span>
+        <span class="badge">Source: ${htmlEscape(chunk.source)}</span>
       </div>`
     )
     .join("");
@@ -105,7 +122,7 @@ const renderInstructionAnalysis = (analysis) => {
     <div class="card">
       <strong>Resolution Type</strong>
       <p>${htmlEscape(analysis.resolutionType)}</p>
-      <span class="status-pill status-pill--success">Authority: ${htmlEscape(analysis.requiredAuthority)}</span>
+      <span class="badge">Authority: ${htmlEscape(analysis.requiredAuthority)}</span>
     </div>
     <div class="card">
       <strong>Key Actions</strong>
@@ -116,12 +133,22 @@ const renderInstructionAnalysis = (analysis) => {
   `;
 };
 
+const renderMissing = (missingFields = []) => {
+  if (!missingFields.length) {
+    elements.missingOutput.innerHTML = "<p>All required fields are filled.</p>";
+    return;
+  }
+  elements.missingOutput.innerHTML = missingFields
+    .map((field) => `<div class="card"><span class="badge badge--warning">Missing</span> ${htmlEscape(field)}</div>`)
+    .join("");
+};
+
 const refreshJsonOutputs = () => {
-  elements.extractionJson.textContent = latestExtraction
-    ? formatJson(latestExtraction)
+  elements.extractionJson.textContent = state.extraction
+    ? formatJson(state.extraction)
     : "Run parsing to view extracted legal data.";
-  elements.reasoningJson.textContent = latestReasoning
-    ? formatJson(latestReasoning)
+  elements.reasoningJson.textContent = state.reasoning
+    ? formatJson(state.reasoning)
     : "Run analysis to view authority reasoning.";
 };
 
@@ -134,11 +161,13 @@ const handleParseDocuments = async () => {
   const files = elements.docUpload.files;
   const textInput = elements.docText.value.trim();
 
-  latestDocuments = await parseDocuments(files, textInput);
-  latestChunks = chunkArticles(latestDocuments);
-  renderChunks(latestChunks);
+  state.documents = await parseDocuments(files, textInput);
+  state.chunks = chunkArticles(state.documents);
+  renderChunks(state.chunks);
 
-  latestExtraction = extractLegalData(latestChunks);
+  state.extraction = extractLegalData(state.chunks);
+  renderReviewForms(state.extraction);
+  renderMissing(state.extraction.missingFields);
   refreshJsonOutputs();
   addChatMessage(
     "Legal AI",
@@ -149,18 +178,41 @@ const handleParseDocuments = async () => {
 };
 
 const handleRunAnalysis = () => {
-  if (!latestExtraction) {
+  if (!state.extraction) {
     elements.instructionOutput.innerHTML = "<p>Please parse documents first.</p>";
     return;
   }
   const instructions = elements.instructionText.value.trim();
-  latestReasoning = analyzeInstructions({
+  state.reasoning = analyzeInstructions({
     instructions,
-    extraction: latestExtraction,
+    extraction: state.extraction,
     resolutionTypeOverride: elements.resolutionType.value,
     authorityOverride: elements.authorityThreshold.value,
   });
-  renderInstructionAnalysis(latestReasoning);
+  renderInstructionAnalysis(state.reasoning);
+  refreshJsonOutputs();
+  addChatMessage("Legal AI", "Analysis complete. Confirm extracted data before drafting.");
+};
+
+const handleConfirmData = () => {
+  if (!state.extraction) {
+    return;
+  }
+  state.extraction.company = {
+    name: elements.companyName.value.trim() || null,
+    form: elements.companyForm.value.trim() || null,
+    commercialLicense: elements.companyLicense.value.trim() || null,
+    registeredAddress: elements.companyAddress.value.trim() || null,
+    jurisdiction: elements.companyJurisdiction.value.trim() || null,
+  };
+
+  state.extraction.directors = gatherListValues(elements.directorsList).filter((director) => director.name);
+  state.extraction.shareholders = gatherListValues(elements.shareholdersList).filter(
+    (shareholder) => shareholder.name
+  );
+
+  state.extraction.missingFields = computeMissingFields(state.extraction);
+  renderMissing(state.extraction.missingFields);
   refreshJsonOutputs();
   addChatMessage(
     "Legal AI",
@@ -169,14 +221,14 @@ const handleRunAnalysis = () => {
 };
 
 const handleGenerateResolution = () => {
-  if (!latestExtraction || !latestReasoning) {
+  if (!state.extraction || !state.reasoning) {
     elements.resolutionOutput.innerHTML = "<p>Please parse documents and run reasoning first.</p>";
     return;
   }
 
-  const draft = draftResolution({
-    extraction: latestExtraction,
-    reasoning: latestReasoning,
+  state.draft = draftResolution({
+    extraction: state.extraction,
+    reasoning: state.reasoning,
     meeting: {
       date: elements.meetingDate.value,
       location: elements.meetingLocation.value,
@@ -192,7 +244,7 @@ const handleGenerateResolution = () => {
 
 const handleLoadSample = () => {
   elements.docText.value = sampleAoA;
-  elements.instructionText.value = sampleInstructions;
+  elements.instructionText.value = `${sampleMinutes}\n\n${sampleEmail}`;
   elements.meetingDate.value = new Date().toISOString().split("T")[0];
   elements.meetingLocation.value = "Dubai, United Arab Emirates";
   elements.chairperson.value = "Ms. Sara Al Mansouri";
@@ -231,8 +283,15 @@ const handleInstructionUpload = async () => {
 };
 
 elements.parseDocs.addEventListener("click", handleParseDocuments);
+elements.instructionUpload.addEventListener("change", handleInstructionUpload);
 elements.runAnalysis.addEventListener("click", handleRunAnalysis);
+elements.confirmData.addEventListener("click", handleConfirmData);
 elements.generateResolution.addEventListener("click", handleGenerateResolution);
+elements.downloadTxt.addEventListener("click", handleDownloadTxt);
+elements.downloadDocx.addEventListener("click", handleDownloadDocx);
+elements.addDirector.addEventListener("click", handleAddDirector);
+elements.addShareholder.addEventListener("click", handleAddShareholder);
+elements.resetChat.addEventListener("click", resetChat);
 elements.loadSample.addEventListener("click", handleLoadSample);
 elements.downloadTxt.addEventListener("click", handleDownloadTxt);
 elements.downloadDocx.addEventListener("click", handleDownloadDocx);
@@ -241,6 +300,7 @@ elements.resetChat.addEventListener("click", resetChat);
 
 renderChunks([]);
 renderInstructionAnalysis(null);
+renderMissing([]);
 refreshJsonOutputs();
 setDownloadState(false);
 resetChat();

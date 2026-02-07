@@ -8,7 +8,8 @@ Article 7 - Reserved matters: amendments to share capital, mergers, dissolution,
 Article 8 - Authority: The Board may approve opening bank accounts, appoint managers, sign leases up to AED 2,000,000.
 Article 9 - Formalities: Notice period is 7 days. Meetings may be held in Dubai. Language: English and Arabic.`;
 
-export const sampleInstructions = `From: CEO
-Subject: New branch and manager appointment
+export const sampleMinutes = `Meeting Minutes - 20 March 2024
+The board discussed expansion to Abu Dhabi. The members agreed to open a new branch and approve a lease for office space up to AED 1,500,000. The board also agreed to appoint Mr. Omar Rashid as Branch Manager with authority to sign contracts related to the new branch, subject to compliance with the Articles of Association.`;
 
-Please prepare a board resolution to open a new branch in Abu Dhabi, approve the lease of office space up to AED 1,500,000, and appoint Mr. Omar Rashid as Branch Manager with authority to sign local contracts.`;
+export const sampleEmail = `Email from CEO - 18 March 2024
+Please prepare a board resolution to open a new branch in Abu Dhabi, appoint Mr. Omar Rashid as Branch Manager, and authorize him to sign local contracts and lease documents up to AED 1,500,000.`;

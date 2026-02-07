@@ -1,6 +1,6 @@
 import { splitSentences } from "./utils.js";
 
-const findMatches = (text, patterns) => {
+const findMatch = (text, patterns) => {
   for (const pattern of patterns) {
     const match = text.match(pattern);
     if (match) {
@@ -9,6 +9,8 @@ const findMatches = (text, patterns) => {
   }
   return null;
 };
+
+const pickFirst = (values) => values.find((value) => value && value.trim());
 
 export const extractLegalData = (chunks) => {
   const combined = chunks.map((chunk) => chunk.body).join(" ");
@@ -100,10 +102,10 @@ export const extractLegalData = (chunks) => {
 
   const authority = {
     boardPowers: sentences
-      .filter((sentence) => /board.*(power|authority|approve)/i.test(sentence))
+      .filter((sentence) => /board.*(power|authority|approve|authorize)/i.test(sentence))
       .slice(0, 6),
     shareholderMatters: sentences
-      .filter((sentence) => /shareholders.*(reserved|approval|authority)/i.test(sentence))
+      .filter((sentence) => /shareholder.*(reserved|approval|authority)/i.test(sentence))
       .slice(0, 6),
     financialThresholds: findMatches(combined, [/threshold[:\-\s]+([^\n.]+)/i]),
     prohibitedActions: sentences.filter((sentence) => /prohibited|shall not/i.test(sentence)).slice(0, 4),
@@ -116,10 +118,16 @@ export const extractLegalData = (chunks) => {
     language: findMatches(combined, [/language[:\-\s]+([^\n.]+)/i]) || null,
   };
 
+  if (!company.name) missingFields.push("Company name");
+  if (!company.registeredAddress) missingFields.push("Registered address");
+  if (!company.commercialLicense) missingFields.push("Commercial license number");
+  if (!directors.length) missingFields.push("Director/manager names");
+  if (!shareholders.length) missingFields.push("Shareholder names and ownership");
+
   return {
     company,
-    shareholders,
     directors,
+    shareholders,
     quorum,
     authority,
     formalities,
