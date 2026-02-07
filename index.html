@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Legal AI Workflow Automation - UAE Resolutions</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.5/tesseract.min.js" defer></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__content">
+      <h1>Legal AI Workflow Automation</h1>
+      <p>Chat-driven drafting for UAE Board & Shareholder Resolutions with traceable authority checks.</p>
+      <div class="hero__badges">
+        <span>UAE Federal Decree-Law No. 32 of 2021</span>
+        <span>Client-Side Processing</span>
+        <span>Audit-Ready Outputs</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="chat">
+      <div class="chat__log" id="chat-log">
+        <div class="chat__message chat__message--bot">
+          <p><strong>Legal AI Assistant:</strong> Welcome. We'll draft your resolution in four guided steps. Start by uploading the constitutional documents (MoA/AoA).</p>
+        </div>
+      </div>
+      <div class="chat__steps">
+        <div class="chat__step">
+          <h2>Step 1 — Upload & Parse Constitutional Documents</h2>
+          <label class="field">
+            <span class="field__label">Upload MoA / AoA (PDF, DOCX, TXT)</span>
+            <input id="doc-upload" type="file" accept=".pdf,.docx,.txt" multiple />
+          </label>
+          <div class="field">
+            <span class="field__label">Or paste document text</span>
+            <textarea id="doc-text" rows="5" placeholder="Paste document excerpts here..."></textarea>
+          </div>
+          <button id="parse-docs" class="button">Parse Documents</button>
+          <div class="output">
+            <h3>Parsed & Chunked Articles</h3>
+            <div id="chunks-output" class="output__body"></div>
+          </div>
+        </div>
+
+        <div class="chat__step">
+          <h2>Step 2 — Provide Resolution Instructions</h2>
+          <label class="field">
+            <span class="field__label">Upload meeting minutes / email instructions</span>
+            <input id="instruction-upload" type="file" accept=".pdf,.docx,.txt" multiple />
+          </label>
+          <label class="field">
+            <span class="field__label">Or paste instructions</span>
+            <textarea id="instruction-text" rows="5" placeholder="Describe the proposed actions..."></textarea>
+          </label>
+          <div class="grid grid--two">
+            <label class="field">
+              <span class="field__label">Resolution Type</span>
+              <select id="resolution-type">
+                <option value="auto">Auto-detect</option>
+                <option value="board">Board Resolution</option>
+                <option value="shareholder">Shareholder Resolution</option>
+                <option value="special">Special Resolution</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="field__label">Authority Threshold</span>
+              <select id="authority-threshold">
+                <option value="auto">Auto-detect</option>
+                <option value="standard">Standard Majority</option>
+                <option value="super">Supermajority / Special</option>
+                <option value="unanimous">Unanimous</option>
+              </select>
+            </label>
+          </div>
+          <button id="run-analysis" class="button">Run Legal Reasoning</button>
+          <div class="output">
+            <h3>Instruction Analysis</h3>
+            <div id="instruction-output" class="output__body"></div>
+          </div>
+        </div>
+
+        <div class="chat__step">
+          <h2>Step 3 — Resolution Drafting Inputs</h2>
+          <label class="field">
+            <span class="field__label">Meeting Date</span>
+            <input id="meeting-date" type="date" />
+          </label>
+          <label class="field">
+            <span class="field__label">Meeting Location</span>
+            <input id="meeting-location" type="text" placeholder="Dubai, United Arab Emirates" />
+          </label>
+          <label class="field">
+            <span class="field__label">Chairperson</span>
+            <input id="chairperson" type="text" placeholder="Name of chairperson" />
+          </label>
+          <div class="button-row">
+            <button id="generate-resolution" class="button button--primary">Generate Resolution</button>
+            <button id="load-sample" class="button button--ghost">Load Sample Data</button>
+          </div>
+          <div class="output">
+            <h3>Drafted Resolution</h3>
+            <div id="resolution-output" class="output__body"></div>
+          </div>
+        </div>
+
+        <div class="chat__step">
+          <h2>Step 4 — Structured JSON Outputs</h2>
+          <div class="grid grid--two">
+            <div class="output">
+              <h3>Extracted Legal Data</h3>
+              <pre id="extraction-json" class="json-output"></pre>
+            </div>
+            <div class="output">
+              <h3>Reasoning & Compliance</h3>
+              <pre id="reasoning-json" class="json-output"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>All processing occurs locally in your browser. No data is transmitted externally.</p>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
